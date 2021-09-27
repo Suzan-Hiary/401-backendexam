@@ -48,7 +48,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 app.use(express.json());
-app.use(cors());
+// app.use(cors());
 require('dotenv').config();
 const PORT = process.env.PORT;
 const axios = require('axios');
@@ -63,7 +63,7 @@ const FlowerSchema = new mongoose.Schema({
     photo: String
 })
 const UserSchema = new mongoose.Schema({
-    email: { type: String, unique: true },
+    email: { type: String, unique: true , dropDups: true },
     flowers: [FlowerSchema]
 })
 
