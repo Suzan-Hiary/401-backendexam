@@ -1,25 +1,30 @@
 'use strict';
 
-const { default: axios } = require("axios");
-
+const axios = require('axios');
+const OwnerModel = require('../model/crypto.modal')
 
 const getCryptoData = (req, res) => {
-    axios.get('https://crypto-explorer.herokuapp.com/crypto-list/')
+    axios.get('https://api.sampleapis.com/coffee/hot')
         .then(crypto => {
-            console.log(crypto);
+            // console.log(crypto);
             res.send(crypto.data)
         })
 };
 
 
 const getfavList = (req, res) => {
+    let email = req.params.email;
 
-    CrypetoModel.find({}, (error, document) => {
+
+    OwnerModel.find({ email: email }, (error, docs) => {
+        // console.log(email);
+        console.log(docs)
         if (error) {
             res.send(error.message)
         } else {
-            if (document) {
-                res.send(document)
+            if (docs) {
+
+                res.send(docs)
             } else {
                 res.send(error.message)
             }
@@ -29,62 +34,55 @@ const getfavList = (req, res) => {
 
 
 }
-
-const AddtotheFav = (req, res) => {
-    const { title, id, description, toUSD, image } = req.query;
-
-    const crybtoObject = {
+function AddtotheFav (req, res) {
+    const { title, description } = req.body;
+    let email = req.params.email;
+    OwnerModel.findOne({ email: email }, (err, ele) => {
+      ele.cryptoS.push({
         title: title,
         description: description,
-        toUSD: toUSD,
-        image: image,
-        id: id
-    }
+      });
+      ele.save();
+      res.send(ele);
+    });
+  }
 
-    CrypetoModel.findOne({ id: id }, (error, docs) => {
-        if (error) {
-            res.send('error')
-        } else {
-            if (docs) {
-                res.send('exist')
-            } else {
-                let newcrypto = new CrypetoModel(crybtoObject);
-                newcrypto.save();
-                res.send(crybtoObject)
-            }
-        }
-    })
-}
+
 
 
 const deletetheFav = (req, res) => {
-   const response = CrypetoModel.deleteOne(
-        { id: req.params.id }
+    let email = req.params.email;
+    let id = req.params.id;
+    OwnerModel.findOne({ email: email }, (error, ele) => {
+        ele.cryptoS.splice(id, 1)
+        ele.save();
+        res.send(ele)
+    }
     )
 
-    res.send(response)
+
 
 }
 
 
 const updatetheFav = (req, res) => {
-    const { title, id, description, toUSD, image } = req.query;
+    const { title, id, description, toUSD, image_url } = req.query;
 
     const crybtoObject = {
         title: title,
         description: description,
         toUSD: toUSD,
-        image: image,
+        image_url: image_url,
         id: id
     }
 
-    const response = CrypetoModel.updatOne(
+    const response = OwnerModel.updatOne(
         { id: req.params.id },
         crybtoObject
     );
- res.send(response) ;
-  
+    res.send(response);
+
 }
 
 
-module.exports={getCryptoData, getfavList, AddtotheFav, deletetheFav, updatetheFav};
+module.exports = { getCryptoData, getfavList, AddtotheFav, deletetheFav, updatetheFav };
